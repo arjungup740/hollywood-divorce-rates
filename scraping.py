@@ -1,13 +1,9 @@
-import wikipediaapi
-import openai
-from dotenv import load_dotenv
 import os
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import time
-
-load_dotenv(dotenv_path='.env')
+import pickle
 
 # Send a GET request to the URL
 def get_infobox(url):
@@ -43,7 +39,8 @@ actor_df
 # Extract the data from the infobox
 start = time.time()
 list_of_dicts = []
-for url in actor_df['document_url']:
+for i, url in enumerate(actor_df['document_url']):
+    print(f'Currently scraping {url} which is number {i}')
     try:
         list_of_dicts.append(get_infobox(url))
     except Exception as e:
@@ -51,17 +48,25 @@ for url in actor_df['document_url']:
 end = time.time()
 print(f'took {end - start}')
 
-###### extract the spouse informatin
+# Specify the filename for storing the pickled data
+filename = 'list_of_dicts.pkl'
+# Open the file in binary write mode and use pickle.dump to save the list
+with open(filename, 'wb') as file:
+    pickle.dump(list_of_dicts, file)
 
-# Extracting specific information like Spouses or Partner
-spouses_or_partners = infobox_data.get('Spouses', infobox_data.get('Partner', 'N/A'))
 
-print(f"Spouses/Partner: {spouses_or_partners}")
-print("Full Infobox Data:")
-for key, value in infobox_data.items():
-    print(f"{key}: {value}")
 
 
 #######
 
 # test = actor_df['document_url'][0:2].apply(get_infobox) # want error handling, otherwise do this next time
+
+url = 'https://en.wikipedia.org/wiki/Marlon_Brando'
+infobox_data = get_infobox(url)
+
+spouses_or_partners = infobox_data.get('Spouses', None)
+
+print(f"Spouses/Partner: {spouses_or_partners}")
+print("Full Infobox Data:")
+for key, value in infobox_data.items():
+    print(f"{key}: {value}")
