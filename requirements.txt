@@ -2,3 +2,4 @@ python-dotenv
 wikipedia-api
 openai
 pandas
+bs4
