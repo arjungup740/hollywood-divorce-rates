@@ -80,6 +80,32 @@ for entry in filtered_data:
 # Create the DataFrame from the rows
 df = pd.DataFrame(rows, columns=['actor', 'variable', 'value'])
 
+df['variable'].unique()
+df[df['variable'] == 'Spouses']
+## extract names & the details
+df[['name', 'details']] = df['value'].str.extract(r'([a-zA-Z\s]+)\s*(\(.*?\))').apply(lambda x: x.str.strip())
+
+### have spouses, spouse(s), spouse, partners, partner(s) partner. Recall singular partner and singular Spouse can have divorce dates. and then if not in the df, they don't have anything
+# handle/ignore partners
+# spouses: extract the distinct beginning and ending letters to see all the possibilities
+
+pattern = r'([a-zA-Z]{1,4}\.\s*\d{4})\s*([a-zA-Z]{1,5}\.\s*\d{4})?' #re.compile(r'([a-zA-Z]{1,4}\.\s*\d{4})(?:;\s*([a-zA-Z]{1,4}\.\s*\d{4}))?')
+
+# Apply the regex to extract the matches into two columns
+df[['first_event', 'second_event']] = df['details'].str.extract(pattern)
+
+## check how many don't have semi-colons in them
+len(df[df['variable'].isin(spouse_terms)])
+df[df['variable'].isin(spouse_terms)].isnull().sum()
+
+df[(df['variable'].isin(spouse_terms)) & (df['first_event'].notnull())]['first_event'].unique()
+
+# come back and address
+df[(df['variable'].isin(spouse_terms)) & (df['first_event'].isnull())]['value']
+
+df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())]['value']
+
+# df.groupby('actor').count()
 
 ########### Trying the straight df way
 
