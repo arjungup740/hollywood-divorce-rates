@@ -89,11 +89,11 @@ df[['name', 'details']] = df['value'].str.extract(r'([a-zA-Z\s]+)\s*(\(.*?\))').
 # handle/ignore partners
 # spouses: extract the distinct beginning and ending letters to see all the possibilities
 
-pattern = r'([a-zA-Z]{1,4}\.\s*\d{4})\s*([a-zA-Z]{1,5}\.\s*\d{4})?' #re.compile(r'([a-zA-Z]{1,4}\.\s*\d{4})(?:;\s*([a-zA-Z]{1,4}\.\s*\d{4}))?')
+pattern = re.compile(r'([a-zA-Z]{1,5}\.? \d{4})\s*;?\s*([a-zA-Z]{1,5}\.? \d{4})?') #re.compile(r'([a-zA-Z]{1,4}\.\s*\d{4})(?:;\s*([a-zA-Z]{1,4}\.\s*\d{4}))?')
 
 # Apply the regex to extract the matches into two columns
 df[['first_event', 'second_event']] = df['details'].str.extract(pattern)
-
+df
 ## check how many don't have semi-colons in them
 len(df[df['variable'].isin(spouse_terms)])
 df[df['variable'].isin(spouse_terms)].isnull().sum()
@@ -101,9 +101,9 @@ df[df['variable'].isin(spouse_terms)].isnull().sum()
 df[(df['variable'].isin(spouse_terms)) & (df['first_event'].notnull())]['first_event'].unique()
 
 # come back and address
-df[(df['variable'].isin(spouse_terms)) & (df['first_event'].isnull())]['value']
-
-df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())]['value']
+df[(df['variable'].isin(spouse_terms)) & (df['first_event'].isnull())][['value', 'first_event']]
+df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())][['value', 'second_event']]
+df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())]['value'].unique()
 
 # df.groupby('actor').count()
 
