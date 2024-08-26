@@ -105,6 +105,7 @@ df[(df['variable'].isin(spouse_terms)) & (df['first_event'].isnull())][['value',
 df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())][['value', 'second_event']]
 df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())]['value'].unique()
 
+df['first_event_abbrev'] = df['first_event'].str.extract('\w+')
 # df.groupby('actor').count()
 
 ########### Trying the straight df way
