@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import pickle
 import numpy as np
+import re
 pd.set_option('display.max_colwidth', 1000)
 
 filename = 'list_of_dicts.pkl'
@@ -43,19 +44,7 @@ filtered_data = [
         for k, v in entry.items() if k in ['actor'] + all_relationship_terms
     }
     for entry in list_of_dicts
-]
-
-#####
-pattern = r'([a-zA-Z\s]+\(.*?\))'
-text = filtered_data[1]['Spouses']
-
-matches = re.findall(pattern, text)
-
-# Display the result
-for match in matches:
-    print(match.strip())
-
-#####
+] # add this to replace \xa0
 
 # Define the regex pattern to match each marriage/partnership
 pattern = re.compile(r'([a-zA-Z\s]+\(.*?\))')
@@ -80,23 +69,25 @@ for entry in filtered_data:
 # Create the DataFrame from the rows
 df = pd.DataFrame(rows, columns=['actor', 'variable', 'value'])
 
-df['variable'].unique()
-df[df['variable'] == 'Spouses']
 ## extract names & the details
 df[['name', 'details']] = df['value'].str.extract(r'([a-zA-Z\s]+)\s*(\(.*?\))').apply(lambda x: x.str.strip())
+pattern = re.compile(r'([a-zA-Z]+\.? \d{4})\s* *;? *\s*([a-zA-Z]+\.? \d{4})?') #re.compile(r'([a-zA-Z]{1,4}\.\s*\d{4})(?:;\s*([a-zA-Z]{1,4}\.\s*\d{4}))?')
 
-### have spouses, spouse(s), spouse, partners, partner(s) partner. Recall singular partner and singular Spouse can have divorce dates. and then if not in the df, they don't have anything
-# handle/ignore partners
-# spouses: extract the distinct beginning and ending letters to see all the possibilities
-
-pattern = re.compile(r'([a-zA-Z]{1,5}\.? \d{4})\s*;?\s*([a-zA-Z]{1,5}\.? \d{4})?') #re.compile(r'([a-zA-Z]{1,4}\.\s*\d{4})(?:;\s*([a-zA-Z]{1,4}\.\s*\d{4}))?')
-
-# Apply the regex to extract the matches into two columns
+## Apply the regex to extract the matches into two columns
 df[['first_event', 'second_event']] = df['details'].str.extract(pattern)
 df
+
+## get out the m. and the year
+df['first_abbrev'] = df['first_event'].str.extract(r'(\w+)\.? ')
+df['second_abbrev'] = df['second_event'].str.extract(r'(\w+)\.? ')
+## if your marriage makes it, then give the np.nan a "surv" for survived
+df.loc[ (df.variable.isin(spouse_terms)) &  (df['second_abbrev'].isnull()), 'second_abbrev'] = 'surv'
+
+######## QA + digging into regexes
 ## check how many don't have semi-colons in them
 len(df[df['variable'].isin(spouse_terms)])
 df[df['variable'].isin(spouse_terms)].isnull().sum()
+## can add a check to see how many have two sets of numbers indicating two events
 
 df[(df['variable'].isin(spouse_terms)) & (df['first_event'].notnull())]['first_event'].unique()
 
@@ -105,8 +96,34 @@ df[(df['variable'].isin(spouse_terms)) & (df['first_event'].isnull())][['value',
 df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())][['value', 'second_event']]
 df[(df['variable'].isin(spouse_terms)) & (df['second_event'].isnull())]['value'].unique()
 
-df['first_event_abbrev'] = df['first_event'].str.extract('\w+')
-# df.groupby('actor').count()
+## looking at abbrevs
+df['first_abbrev'].unique()
+len(df[ ( df['variable'].isin(spouse_terms) ) & ~( df['first_abbrev'].isin(['m']) ) ]) # not too bad
+
+df['second_abbrev'].unique()
+df[ ( df['variable'].isin(spouse_terms) ) & ( df['second_abbrev'].isnull())  ].details.unique()
+
+######## Make some charts
+
+working = df[df['variable'].isin(spouse_terms)]
+len(working) # 1452 marriages
+
+## 1) count of marriages
+count_table = working.groupby('actor')['first_abbrev'].count().reset_index().rename(columns = {'first_abbrev':'count'})
+
+len(count_table[count_table['count'] != 1]) # have been divorced
+# add who have been divorced and only one marriage
+len(count_table[count_table['count'] == 1])
+
+working.groupby(['first_abbrev', 'second_abbrev'])['actor'].agg(['count', 'nunique'])#.sum()
+
+working.groupby('actor')
+
+div_abbrevs = ['ann', 'annul', 'div', 'sep']
+
+
+## 2) number more than one
+
 
 ########### Trying the straight df way
 
@@ -122,11 +139,6 @@ df['Spouses'][0]
 
 df[df['Spouses'].notnull()][['Spouses']].iloc[0]
 
-import re
-import pandas as pd
-
-import re
-import pandas as pd
 
 def analyze_marriages(spouse_info):
     # Check if the spouse_info is None or an empty string

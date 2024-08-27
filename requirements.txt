@@ -1,5 +1,7 @@
-python-dotenv
-wikipedia-api
-openai
+# python-dotenv
+# wikipedia-api
+# openai
 pandas
 bs4
+seaborn
+matplotlib
