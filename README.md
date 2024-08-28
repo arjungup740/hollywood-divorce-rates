@@ -1,11 +1,11 @@
 Goal -- what is the divorce rate of hollywood actors
 
 Todo
-* add in never marrieds -- tried, kinda failed
-* do QA to make sure numbers are good
-* put charts in
 * key takeaways and other discussions, wrap up
+* make it reproducible
+* re-put in charts
 * after that if time, can look at some of these other questions
+* maybe go back and make taco bell reproducible
 
 * we want to take this and get 
     * number of marriages
@@ -31,11 +31,15 @@ Todo
 
     
 * QA Notes
-    * we lose 11 actors and the spouses going from list of dicts to df, because our regex doesn't handle them properly (no parenthesis, just names), and handling them properly breaks other people
+    * we lose 11 actors and the spouses going from list of dicts to df, because our regex doesn't handle them properly (no parenthesis, just names), and handling them properly breaks other people.
+    * 134 actors show up as never married, and we don't have them in the data at the moment
 
     * some clear things to check
-        * number of people who have nan first event but don't have partners (this is an error)
-        * check the never people, how many
+        * number of people who have nan first event but don't have partners (this is an error) -- cleaned most of the different ways this can arise
+        * check the never people
+            * check that those who don't appear in the df indeed don't have spouses
+                * step through for a handful and see why this is the case -- whoopi goldberg, client eastwood
+            * 
         * check how many were unscrapable/only pulled url data -- e.g. kevin harts
 
     * how many don't have dates

@@ -36,25 +36,37 @@ actor_df = pd.read_csv('1000_actors_input.csv')
 actor_df['name'] = actor_df['document_url'].str.split('/').str[-1].str.replace('_', ' ')
 actor_df
 
+## rescrapes
+filename = 'not_in_df.pkl'
+with open(filename, 'rb') as file:
+    not_in_df = pickle.load(file) 
+
+url_list = actor_df[actor_df['name'].isin(not_in_df)]['document_url']
+# url_list = actor_df['document_url']
 # Extract the data from the infobox
 start = time.time()
 list_of_dicts = []
-for i, url in enumerate(actor_df['document_url']):
+error_list = []
+for i, url in enumerate(url_list):
     print(f'Currently scraping {url} which is number {i}')
     try:
         list_of_dicts.append(get_infobox(url))
+        time.sleep(1)
     except Exception as e:
-        list_of_dicts.append({'url':url, 'error':e})
+        error_list.append({'url':url, 'error':e})
 end = time.time()
 print(f'took {end - start}')
 
 # Specify the filename for storing the pickled data
-filename = 'list_of_dicts.pkl'
+# filename = 'list_of_dicts.pkl'
+filename = 'missings_dict.pkl'
 # Open the file in binary write mode and use pickle.dump to save the list
 with open(filename, 'wb') as file:
     pickle.dump(list_of_dicts, file)
 
-
+for entry in list_of_dicts:
+    if entry['actor'] == 'Emma Watson':
+        print(entry)
 
 
 #######
