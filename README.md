@@ -1,7 +1,7 @@
 Goal -- what is the divorce rate of hollywood actors
 
 Todo
-* add in never marrieds
+* add in never marrieds -- tried, kinda failed
 * do QA to make sure numbers are good
 * put charts in
 * key takeaways and other discussions, wrap up
@@ -30,7 +30,14 @@ Todo
 
 
     
-* QA questions
+* QA Notes
+    * we lose 11 actors and the spouses going from list of dicts to df, because our regex doesn't handle them properly (no parenthesis, just names), and handling them properly breaks other people
+
+    * some clear things to check
+        * number of people who have nan first event but don't have partners (this is an error)
+        * check the never people, how many
+        * check how many were unscrapable/only pulled url data -- e.g. kevin harts
+
     * how many don't have dates
     * make sure the df is sorted chronologically when running the window function, so that first marriages are showing up first/survs are showing up last
 
